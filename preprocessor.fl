@@ -1,0 +1,112 @@
+%{
+	#include <stdio.h>
+	#include <string.h>
+
+	typedef struct {
+		char * fName;
+		int argNum;	
+	}FUNC;
+
+	int count=0;
+	FUNC syms[100];
+
+	
+
+	int countArguments(char* s){
+		char *c =s;
+		int count =1;
+		while (*c != '\0'){
+			if (*c == '(' && *(c+1)==')')
+				return 0;
+			if( *c == ',')
+				count++;
+			c++;
+		}
+		return count;
+	}
+	char* findFName(char *s){
+		char *fName = (char *)malloc(sizeof(char)*100);
+		while(*s!=' '){
+			s++;
+		}
+		s++;
+		int i=0;
+		while(*s != ' ' && *s!='('){
+			*(fName + i)=*s;
+			i++;
+			s++;
+		}
+		//i++;
+		*(fName + i)='\0';
+		return fName;
+	}
+	char* findFNameFCall(char *s){
+		char *fName = (char *)malloc(sizeof(char)*100);
+		int i=0;
+		while(*s!='('){
+			*(fName + i)=*s;
+			s++;
+			i++;
+		}
+		//i++;
+		*(fName + i) = '\0';
+		return fName;
+	}
+%}
+
+WS [\t\n\r ]+
+ID [a-zA-Z0-9]+
+TYPESPECIFIER int|void
+FID ([a-z][a-zA-Z]*) 
+PARAM {TYPESPECIFIER}\ {FID}
+NUM [0-9]+
+ARG {TYPESPECIFIER}\ {NUM}
+FCALL {FID}\ ?\(({NUM},\ ?)*{NUM}?\)
+%%
+{TYPESPECIFIER}\ main\ ?\(\)	{ printf("%s",yytext);}
+printf				{printf("%s",yytext);}
+{TYPESPECIFIER}\ {FID}\ ?\(({PARAM},\ )*{PARAM}?\) {
+		count = countArguments(yytext);
+		char *c = yytext;
+		//printf("%s\n",c);
+		while(*c!=' ')
+			c++;
+		c++;
+		while(*c!=' ' && *c!='(')
+			c++;
+		char *tmp = (char *)malloc(sizeof(char)*100);
+		//printf("lel\n");
+		strcpy(tmp,c);
+		//printf("%s\n",tmp);
+		*c = count +48;
+		*(c+1)='\0';
+		strcat(c,tmp);
+		printf("%s",yytext);
+	}
+{FCALL}	{	
+		count = countArguments(yytext);
+		char *c = yytext;
+		//printf("c = %s\n",c);
+		while(*c!='(')
+			c++;
+		char *tmp = (char *)malloc(sizeof(char)*100);
+		//printf("lel\n");
+		strcpy(tmp,c);
+		//printf("tmp = %s\n",tmp);
+		*c = count +48;
+		*(c+1)='\0';
+		strcat(c,tmp);
+		printf("%s",yytext);
+	}
+;	{
+		ECHO;
+	}
+.	{
+		printf("%s",yytext);
+	}
+
+%%
+	main(int argc,char **argv){
+		yylex();
+	}
+
