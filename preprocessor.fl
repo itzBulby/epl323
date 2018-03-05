@@ -1,17 +1,13 @@
 %{
 	#include <stdio.h>
 	#include <string.h>
-
+	/*
 	typedef struct {
 		char * fName;
 		int argNum;	
 	}FUNC;
-
+	*/
 	int count=0;
-	FUNC syms[100];
-
-	
-
 	int countArguments(char* s){
 		char *c =s;
 		int count =1;
@@ -24,34 +20,6 @@
 		}
 		return count;
 	}
-	char* findFName(char *s){
-		char *fName = (char *)malloc(sizeof(char)*100);
-		while(*s!=' '){
-			s++;
-		}
-		s++;
-		int i=0;
-		while(*s != ' ' && *s!='('){
-			*(fName + i)=*s;
-			i++;
-			s++;
-		}
-		//i++;
-		*(fName + i)='\0';
-		return fName;
-	}
-	char* findFNameFCall(char *s){
-		char *fName = (char *)malloc(sizeof(char)*100);
-		int i=0;
-		while(*s!='('){
-			*(fName + i)=*s;
-			s++;
-			i++;
-		}
-		//i++;
-		*(fName + i) = '\0';
-		return fName;
-	}
 %}
 
 WS [\t\n\r ]+
@@ -63,8 +31,8 @@ NUM [0-9]+
 ARG {TYPESPECIFIER}\ {NUM}
 FCALL {FID}\ ?\(({NUM},\ ?)*{NUM}?\)
 %%
-{TYPESPECIFIER}\ main\ ?\(\)	{ printf("%s",yytext);}
-printf				{printf("%s",yytext);}
+{TYPESPECIFIER}\ main\ ?\(\)	{ fprintf(yyout,"%s",yytext);}
+printf				{fprintf(yyout,"%s",yytext);}
 {TYPESPECIFIER}\ {FID}\ ?\(({PARAM},\ )*{PARAM}?\) {
 		count = countArguments(yytext);
 		char *c = yytext;
@@ -80,10 +48,14 @@ printf				{printf("%s",yytext);}
 		//printf("%s\n",tmp);
 		*c = count +48;
 		*(c+1)='\0';
-		strcat(c,tmp);
-		printf("%s",yytext);
+		//strcat(c,tmp);
+		char *result = (char *)malloc(sizeof(char)*100);
+		strcpy(result,yytext);
+		strcat(result,tmp);
+		fprintf(yyout,"%s",result);
 	}
 {FCALL}	{	
+		//printf("Matched = %s\n",yytext);
 		count = countArguments(yytext);
 		char *c = yytext;
 		//printf("c = %s\n",c);
@@ -95,18 +67,26 @@ printf				{printf("%s",yytext);}
 		//printf("tmp = %s\n",tmp);
 		*c = count +48;
 		*(c+1)='\0';
-		strcat(c,tmp);
-		printf("%s",yytext);
+		//printf("yytext before cat = %s\n",yytext);
+		//printf("tmp before cat = %s__\n",tmp);
+		//strcat(c,tmp);
+		char *result = (char *)malloc(sizeof(char)*100);
+		strcpy(result,yytext);
+		strcat(result,tmp);
+		fprintf(yyout,"%s",result);
+		
 	}
 ;	{
 		ECHO;
 	}
 .	{
-		printf("%s",yytext);
+		ECHO;
 	}
 
 %%
 	main(int argc,char **argv){
+		
+		yyout = fopen("preprocessed.c","w");
 		yylex();
 	}
 
