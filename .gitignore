@@ -1,0 +1,7 @@
+#Ignore Everything
+*
+
+#Allow
+!*.y
+!*.fl
+!*.md
