@@ -85,8 +85,13 @@ printf				{fprintf(yyout,"%s",yytext);}
 
 %%
 	main(int argc,char **argv){
-		
-		yyout = fopen("preprocessed.c","w");
+		if(argc<2){
+			printf("You have to give an output filename\n");
+			exit(-1);
+		} else {
+			yyout = fopen(argv[1],"w");
+		}
+	
 		yylex();
 	}
 
