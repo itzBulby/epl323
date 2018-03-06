@@ -2,12 +2,13 @@
     #include "cminus.tab.h"
     #include "string.h"
 %}
-//reserved words = tokens
+
+%option yylineno
 LETTER [a-zA-Z]
 DIGIT [0-9]
 ID {LETTER}+
 NUM {DIGIT}+
-WSP [ \t\n]
+WSP [\t\n]+
 IF if
 ELSE else
 INT int
@@ -56,9 +57,12 @@ RELOP \<|\<=|\>|\>=|==|!=
 				strcpy(yylval.buf,yytext);
 				return ID;
 			}
+{WSP}			{/*TRim*/}
 \/\*.\*\/		{/*Trim*/}
 %%
-
+int yyerror (char* s) {/* Called by yyparse on error */
+  printf ("%s in line %d\n", s,yylineno);
+}
 int yywrap (){
     return 1;
 }

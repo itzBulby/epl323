@@ -5,11 +5,30 @@
     extern char *yytext; /*using flex */
                          /* use extern char yytext; with lex */
 	//int yydebug=0;
+	char* itoa(int i, char *b){
+	    char const digit[] = "0123456789";
+	    char* p = b;
+	    if(i<0){
+		*p++ = '-';
+		i *= -1;
+	    }
+	    int shifter = i;
+	    do{ //Move to where representation ends
+		++p;
+		shifter = shifter/10;
+	    }while(shifter);
+	    *p = '\0';
+	    do{ //Move back, inserting digits as u go
+		*--p = digit[i%10];
+		i = i/10;
+	    }while(i);
+	    return b;
+	}
 	
 %}
 
 //function words need tokens
-
+%locations
 %union {int num; char buf[100];}
 
 %start program
@@ -23,7 +42,7 @@
 %token <buf> RETURN
 %token <buf> VOID
 %token <buf> WHILE
-%token <buf> EMPTY
+
 
 
 %type <buf> declaration-list
@@ -57,8 +76,18 @@
 %type <buf> args
 %type <buf> arg-list
 //%type <buf> empty
-%nonassoc "empty"
-%left ELSE
+/*
+%left ID NUM
+%left RELOP
+%left VOID
+%left INT
+%left WHILE
+%left IF RETURN
+*/
+%left '+' '-'
+%left '*' '/'
+%nonassoc ')'
+%nonassoc ELSE
 %%
 
 program : declaration-list {
@@ -67,55 +96,63 @@ program : declaration-list {
 	;
 
 declaration-list : declaration-list declaration {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		printf("declaration-list = %s\n",$$);
 	}
 	| declaration {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("declaration-list = %s\n",$$);
 	}	
 	;
 
 declaration : var-declaration {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("declaration = %s\n",$$);
 	}
 	| fun-declaration {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("declaration = %s\n",$$);
 	}
 	;
 
 var-declaration : type-specifier ID ';' {
-		strcat($$,$1);
+		//strcat($$,$1);
+		strcat($$," ");
 		strcat($$,$2);
 		strcat($$,";");
+		strcat($$,"\n");
 		printf("var-declaration = %s\n",$$);
 	}
 	| type-specifier ID'['NUM']' ';' {
-		strcat($$,$1);
+		char c[100];
+		//strcat($$,$1);
+		strcat($$," ");
 		strcat($$,$2);
 		strcat($$,"[");
-		strcat($$,$4);
+		itoa($1,c);
+		strcat($$,c);
 		strcat($$,"]");
 		strcat($$,";");
+		strcat($$,"\n");
 		printf("var-declaration = %s\n",$$);
 	}
 	;
 
 type-specifier : INT {
-		strcat($$,$1);
+		//strcat($$,$1);
+		strcat($$," ");
 		printf("type-specifier = %s\n",$$);
 	}
 	| VOID {
-		strcat($$,$1);
+		//strcat($$,$1);
+		strcat($$," ");
 		printf("type-specifier = %s\n",$$);
 	}
 	;
 
 fun-declaration : type-specifier ID '('params')' compound-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		strcat($$,"(");
 		strcat($$,$4);
@@ -126,33 +163,34 @@ fun-declaration : type-specifier ID '('params')' compound-stmt {
 	;
 
 params : param-list {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("params = %s\n",$$);
 	}
 	| VOID {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("params = %s\n",$$);
 	}
 	;
 
-param-list : param-list param {
-		strcat($$,$1);
-		strcat($$,$2);
+param-list : param-list',' param {
+		//strcat($$,$1);
+		strcat($$,",");
+		strcat($$,$3);
 		printf("param-list = %s\n",$$);
 	}
 	| param {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("param-list = %s\n",$$);
 	}
 	;
 
 param : type-specifier ID {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		printf("param = %s\n",$$);
 	}
 	| type-specifier ID'['']' {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		strcat($$,"[");
 		strcat($$,"]");
@@ -171,60 +209,62 @@ compound-stmt : '{' local-declarations statement-list '}' {
 	;
 
 local-declarations : local-declarations var-declaration {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		printf("local-declarations = %s\n",$$);
 	}
 	|  {
-		$$ = "";
+		//strcat($$,"");
 	}
 	;
 
-statement-list : statement-list statement {
-		strcat($$,$1);
+statement-list :  {
+		//strcat($$,"");
+		//printf("statement-list = **EMPTY**\n");
+	}
+	| statement-list statement {
+		//strcat($$,$1);
 		strcat($$,$2);
 		printf("statement-list = %s\n",$$);
-	}
-	|  {
-		$$ = "";
-		printf("statement-list = **EMPTY**\n",$$);
 	}
 	;
 
 statement : expression-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("statement = %s\n",$$);
 	}
 	| compound-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("statement = %s\n",$$);
 	}
 	| selection-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("statement = %s\n",$$);
 	}
 	| iteration-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("statement = %s\n",$$);
 	}
 	| return-stmt {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("statement = %s\n",$$);
 	}
 	;
 
 expression-stmt : expression';' {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,";");
+		strcat($$,"\n");
 		printf("expression-stmt = %s\n",$$);
 	}
 	| ';' {
-		$$ = ";";
+		strcat($$,";");
+		strcat($$,"\n");
 	}
 	;
 
-selection-stmt : IF '('expression')' statement ELSE statement %prec {
-		strcat($$,$1);
+selection-stmt : IF '('expression')' statement ELSE statement {
+		//strcat($$,$1);
 		strcat($$,"(");
 		strcat($$,$3);
 		strcat($$,")");
@@ -234,7 +274,7 @@ selection-stmt : IF '('expression')' statement ELSE statement %prec {
 		printf("selection-smtm = %s\n",$$);
 	}
 	| IF '('expression')' statement {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,"(");
 		strcat($$,$3);
 		strcat($$,")");
@@ -263,7 +303,7 @@ else-stmt: {
 	;
 */
 iteration-stmt : WHILE '('expression')' statement {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,"(");
 		strcat($$,$3);
 		strcat($$,")");
@@ -273,36 +313,39 @@ iteration-stmt : WHILE '('expression')' statement {
 	;
 
 return-stmt : RETURN ';' {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,";");
+		strcat($$,"\n");
 		printf("return-smtm = %s\n",$$);
 	}
 	| RETURN expression ';' {
-		strcat($$,$1);
+		//strcat($$,$1);
+		strcat($$," ");
 		strcat($$,$2);
 		strcat($$,";");
+		strcat($$,"\n");
 		printf("return-smtm = %s\n",$$);
 	}
 	;
 
 expression : var '=' expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,"=");
 		strcat($$,$3);
 		printf("expression = %s\n",$$);
 	}
 	| simple-expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("expression = %s\n",$$);
 	}
 	;
 
 var : ID {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Var = %s\n",$$);
 	}
 	| ID '['expression']' {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,"[");
 		strcat($$,$3);
 		strcat($$,"]");
@@ -311,55 +354,55 @@ var : ID {
 	;
 
 simple-expression : additive-expression RELOP additive-expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		strcat($$,$3);
 		printf("Simple-Expression: %s\n",$$);
 	}	
 	| additive-expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Simple-Expression: %s\n",$$);
 	}
 	;
 
 
 additive-expression : additive-expression addop term {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,$2);
 		strcat($$,$3);
 		printf("Additive-expression: %s\n",$$);
 	}
 	| term {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Additive-expression: %s\n",$$);
 	}
 	;
 
 addop : '+' 	{
-		$$ = "+";
+		strcat($$,"+");
 	}
 	| '-' 	{
-		$$ = "-";
+		strcat($$,"-");
 	}
 	;
 
 term : term mulop factor {
-		strcat($$,$1);
+		strcpy($$,$1);
 		strcat($$,$2);
 		strcat($$,$3);
 		printf("Term = %s\n",$$);
 	}
 	| factor {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Term = %s\n",$$);
 	}
 	;
 
 mulop : '*' {
-		$$ = "*";
+		strcat($$,"*");
 	}
 	| '/' {
-		$$ = "/";
+		strcat($$,"/");
 	}
 	;
 
@@ -370,23 +413,23 @@ factor : '(' expression ')' {
 		printf("Factor = %s\n",$$);
 	}
 	| var {	
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Factor = %s\n",$$);
 	}
 	| call {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Factor = %s\n",$$);
 	}
 	| NUM {
 		char c[30];
-		ltoa($1,c,10);
-		strcat($$,$1);
+		itoa($1,c);
+		strcat($$,c);
 		printf("Factor = %s\n",$$);
 	}
 	;
 
 call : ID '('args')' {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,"(");
 		strcat($$,$3);
 		strcat($$,")");
@@ -395,23 +438,23 @@ call : ID '('args')' {
 	;
 
 args : arg-list {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Args = %s\n",$$);
 	}
 	|  {
-		$$ = "";
+		strcat($$,"");
 		printf("Args = %s\n",$$);
 	}
 	;
 
 arg-list : arg-list ',' expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		strcat($$,",");
 		strcat($$,$3);		
 		printf("Arg-list = %s\n",$$);	
 	}
 	| expression {
-		strcat($$,$1);
+		//strcat($$,$1);
 		printf("Arg-list = %s\n",$$);	
 	}
 	;
@@ -423,6 +466,4 @@ int main (void) {
     return yyparse ();
 }
 
-int yyerror (char* s) {/* Called by yyparse on error */
-  printf ("%s\n", s);
-}
+
