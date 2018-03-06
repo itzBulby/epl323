@@ -8,16 +8,55 @@ DIGIT [0-9]
 ID {LETTER}+
 NUM {DIGIT}+
 WSP [ \t\n]
-
+IF if
+ELSE else
+INT int
+RETURN return
+VOID void
+WHILE while
+OPERATOR \+|\-|\*|\/|=|;|,|\(|\)|\[|\]|\{|\}
+RELOP \<|\<=|\>|\>=|==|!=
 %%
-{NUM}				{
-							yylval.num = atoi(yytext);
-							return NUM;
-						}
-{ID}				{
-							strcpy(yylval.buf,yytext);
-							return ID;
-						}
+{RELOP}			{
+				strcpy(yylval.buf,yytext);
+				return RELOP;
+			}
+{OPERATOR}		{
+				return yytext[0];
+			}
+{IF}			{
+				strcpy(yylval.buf,yytext);
+				return IF;
+			}
+{ELSE}			{		
+				strcpy(yylval.buf,yytext);
+				return ELSE;
+			}
+{INT}			{
+				strcpy(yylval.buf,yytext);
+				return INT;
+			}
+{RETURN}		{
+				strcpy(yylval.buf,yytext);
+				return RETURN;
+			}
+{VOID}			{
+				strcpy(yylval.buf,yytext);
+				return VOID;
+			}
+{WHILE}			{
+				strcpy(yylval.buf,yytext);
+				return WHILE;
+			}
+{NUM}			{
+				yylval.num = atoi(yytext);
+				return NUM;
+			}
+{ID}			{
+				strcpy(yylval.buf,yytext);
+				return ID;
+			}
+\/\*.\*\/		{/*Trim*/}
 %%
 
 int yywrap (){
