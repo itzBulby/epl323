@@ -29,7 +29,7 @@
 
 //function words need tokens
 %locations
-%union {int num; char buf[100];}
+%union {int num; char buf[5000];}
 
 %start program
 
@@ -90,27 +90,31 @@
 %%
 
 program : declaration-list {
-		printf("program = %s\n",$1);
+		//printf("program = %s\n",$1);
+		printf("Program Accepted!\n");
 	}	
 	;
 
 declaration-list : declaration-list declaration {
 		//strcat($$,$1);
+		strcpy($$,$1);
 		strcat($$,$2);
 		printf("declaration-list = %s\n",$$);
 	}
 	| declaration {
 		//strcat($$,$1);
+		strcpy($$,$1);
 		printf("declaration-list = %s\n",$$);
 	}	
 	;
 
 declaration : var-declaration {
 		//strcat($$,$1);
+		strcpy($$,$1);
 		printf("declaration = %s\n",$$);
 	}
 	| fun-declaration {
-		//strcat($$,$1);
+		strcpy($$,$1);
 		printf("declaration = %s\n",$$);
 	}
 	;
@@ -151,7 +155,7 @@ type-specifier : INT {
 	;
 
 fun-declaration : type-specifier ID '('params')' compound-stmt {
-		//strcat($$,$1);
+		strcpy($$,$1);
 		strcat($$,$2);
 		strcat($$,"(");
 		strcat($$,$4);
@@ -269,6 +273,7 @@ selection-stmt : IF '('expression')' statement ELSE statement {
 		strcat($$,")");
 		strcat($$,$5);
 		strcat($$,$6);
+		strcat($$," ");
 		strcat($$,$7);
 		printf("selection-smtm = %s\n",$$);
 	}
@@ -293,6 +298,7 @@ iteration-stmt : WHILE '('expression')' statement {
 
 return-stmt : RETURN ';' {
 		//strcat($$,$1);
+		strcat($$," ");
 		strcat($$,";");
 		strcat($$,"\n");
 		printf("return-smtm = %s\n",$$);
@@ -358,10 +364,10 @@ additive-expression : additive-expression addop term {
 	;
 
 addop : '+' 	{
-		strcat($$,"+");
+		strcpy($$,"+");
 	}
 	| '-' 	{
-		strcat($$,"-");
+		strcpy($$,"-");
 	}
 	;
 
@@ -378,10 +384,10 @@ term : term mulop factor {
 	;
 
 mulop : '*' {
-		strcat($$,"*");
+		strcpy($$,"*");
 	}
 	| '/' {
-		strcat($$,"/");
+		strcpy($$,"/");
 	}
 	;
 
@@ -402,7 +408,7 @@ factor : '(' expression ')' {
 	| NUM {
 		char c[30];
 		itoa($1,c);
-		strcat($$,c);
+		strcpy($$,c);
 		printf("Factor = %s\n",$$);
 	}
 	;

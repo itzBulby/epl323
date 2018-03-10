@@ -2,6 +2,8 @@
     #include "cminus.tab.h"
     #include "string.h"
     int commentSection=0;
+	#undef YYLMAX
+#define YYLMAX 40000
 %}
 
 %option yylineno
@@ -35,7 +37,7 @@ RELOP \<|\<=|\>|\>=|==|!=
 					strcpy(yylval.buf,yytext);
 					return IF;
 				}
-			}
+			 }
 {ELSE}			{	
 				if(!commentSection){	
 					strcpy(yylval.buf,yytext);
