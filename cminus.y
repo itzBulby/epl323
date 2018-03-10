@@ -84,8 +84,7 @@
 %left WHILE
 %left IF RETURN
 */
-%left '+' '-'
-%left '*' '/'
+
 %nonassoc ')'
 %nonassoc ELSE
 %%
@@ -200,7 +199,7 @@ param : type-specifier ID {
 	;
 
 compound-stmt : '{' local-declarations statement-list '}' {
-		strcat($$,"{");
+		strcpy($$,"{");
 		strcat($$,$2);
 		strcat($$,$3);
 		strcat($$,"}");
@@ -214,18 +213,18 @@ local-declarations : local-declarations var-declaration {
 		printf("local-declarations = %s\n",$$);
 	}
 	|  {
-		//strcat($$,"");
+		strcpy($$,"");
 	}
 	;
 
-statement-list :  {
-		//strcat($$,"");
-		//printf("statement-list = **EMPTY**\n");
-	}
-	| statement-list statement {
+statement-list : statement-list statement {
 		//strcat($$,$1);
 		strcat($$,$2);
 		printf("statement-list = %s\n",$$);
+	}
+	|  {
+		strcpy($$,"");
+		//printf("statement-list = **EMPTY**\n");
 	}
 	;
 
@@ -281,27 +280,7 @@ selection-stmt : IF '('expression')' statement ELSE statement {
 		strcat($$,$5);
 		printf("selection-smtm = %s\n",$$);
 	}
-/*
-	|IF '('expression')' statement unmatched-stmt {
-		strcat($$,$1);
-		strcat($$,"(");
-		strcat($$,$3);
-		strcat($$,")");
-		strcat($$,$5);
-		strcat($$,$6);
-		printf("selection-smtm = %s\n",$$);
-	}*/
-	;
-/*
-else-stmt: {
-		$$ = "";
-	} 
-	|ELSE statement {
-		strcat($$,$1);
-		strcat($$,$2);
-	}
-	;
-*/
+
 iteration-stmt : WHILE '('expression')' statement {
 		//strcat($$,$1);
 		strcat($$,"(");

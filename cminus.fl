@@ -1,9 +1,12 @@
 %{
     #include "cminus.tab.h"
     #include "string.h"
+    int commentSection=0;
 %}
 
 %option yylineno
+BEGINCOMMENT "/*"
+ENDCOMMENT "*/"
 LETTER [a-zA-Z]
 DIGIT [0-9]
 ID {LETTER}+
@@ -19,49 +22,77 @@ OPERATOR \+|\-|\*|\/|=|;|,|\(|\)|\[|\]|\{|\}
 RELOP \<|\<=|\>|\>=|==|!=
 %%
 {RELOP}			{
-				strcpy(yylval.buf,yytext);
-				return RELOP;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return RELOP;
+				}
 			}
-{OPERATOR}		{
-				return yytext[0];
+{OPERATOR}		{	if(!commentSection)
+					return yytext[0];
 			}
-{IF}			{
-				strcpy(yylval.buf,yytext);
-				return IF;
+{IF}			{	
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return IF;
+				}
 			}
-{ELSE}			{		
-				strcpy(yylval.buf,yytext);
-				return ELSE;
+{ELSE}			{	
+				if(!commentSection){	
+					strcpy(yylval.buf,yytext);
+					return ELSE;
+				}
 			}
 {INT}			{
-				strcpy(yylval.buf,yytext);
-				return INT;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return INT;
+				}
 			}
 {RETURN}		{
-				strcpy(yylval.buf,yytext);
-				return RETURN;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return RETURN;
+				}
 			}
 {VOID}			{
-				strcpy(yylval.buf,yytext);
-				return VOID;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return VOID;
+				}
 			}
 {WHILE}			{
-				strcpy(yylval.buf,yytext);
-				return WHILE;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return WHILE;
+				}
 			}
 {NUM}			{
-				yylval.num = atoi(yytext);
-				return NUM;
+				if(!commentSection){
+					yylval.num = atoi(yytext);
+					return NUM;
+				}
 			}
 {ID}			{
-				strcpy(yylval.buf,yytext);
-				return ID;
+				if(!commentSection){
+					strcpy(yylval.buf,yytext);
+					return ID;
+				}
+				
 			}
 {WSP}			{/*TRim*/}
-\/\*.\*\/		{/*Trim*/}
+{BEGINCOMMENT}		{
+				commentSection=1;
+			}
+{ENDCOMMENT}		{
+				if(commentSection==1)
+					commentSection=0;
+				else
+					yyerror("Trying to close comment section while there's none");
+			}
+\/\*[^\*\/)]*\*\/	{/*Trim*/}
 %%
 int yyerror (char* s) {/* Called by yyparse on error */
-  printf ("%s in line %d\n", s,yylineno);
+  printf ("%s in line %d\n unexpected %s\n", s,yylineno,yytext);
 }
 int yywrap (){
     return 1;
