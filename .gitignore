@@ -5,4 +5,7 @@
 !*.y
 !*.fl
 !*.md
+<<<<<<< HEAD
 !.gitignore
+=======
+>>>>>>> 4bb729d221cea4ba6d2daddac63773a96c9a5062
