@@ -1,9 +1,19 @@
+/****************************************
+*					*
+* EPL323 - Compilers		        *
+* Project - Part A		        *
+*				        *
+* Nikolas Pafitis - ID:1001442		*
+* Giorgos Panayiotou - ID:927496	*
+*					*
+****************************************/
 %{
     #include "cminus.tab.h"
     #include "string.h"
     int commentSection=0;
 	#undef YYLMAX
 #define YYLMAX 40000
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 %}
 
 %option yylineno
@@ -94,7 +104,7 @@ RELOP \<|\<=|\>|\>=|==|!=
 \/\*[^\*\/)]*\*\/	{/*Trim*/}
 %%
 int yyerror (char* s) {/* Called by yyparse on error */
-  printf ("%s in line %d\n unexpected %s\n", s,yylineno,yytext);
+  printf ("%s in line %d\nUnexpected %s in line %d\n", s,yylineno,yytext,yylineno);
 }
 int yywrap (){
     return 1;
